@@ -1,0 +1,10 @@
+Party 1 10
+Party 2 20
+Party 3 30
+Party 4 40
+Party 5 50
+Party 6 60
+Party 7 70
+Party 8 80
+Party 9 90
+Party 10 100
