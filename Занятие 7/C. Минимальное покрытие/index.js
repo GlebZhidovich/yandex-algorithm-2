@@ -2,37 +2,72 @@
 
 const fs = require('fs');
 
-function getMinimumCoverage(sequence) {
+function getCoverage(sequence) {
     let [m, ...lines] = sequence.split('\n');
     m = parseInt(m);
     const s = 0;
 
     const result = [];
 
-    const before = [];
     const mid = [];
 
     for (let index = 0; index < lines.length - 1; index++) {
         const l = lines[index];
+        if (l === '0 0') {
+            break;
+        }
         const arr = l.split(' ').map((n) => parseInt(n));
         if (!(arr[0] > m || arr[1] < s)) {
-            if (arr[0] <= 0) {
-                before.push(arr);
-            } else {
-                mid.push(arr);
-            }
+            mid.push(arr);
         }
     }
 
-    for (let index = 0; index < before.length; index++) {
-        // const [time, hours] = sortedLines[index];
-        // const nextTime = time + hours;
+    if (!mid.length) {
+        return 'No solution';
     }
 
-    return 'amount';
+    mid.sort((a, b) => a[0] - b[0]);
+
+    let curR = 0;
+
+    let curLine;
+
+    for (let index = 0; index < mid.length; index++) {
+        const line = mid[index];
+        const [l] = line;
+
+        if (!curLine) {
+            if (l > curR) {
+                return 'No solution';
+            } else {
+                curLine = line;
+            }
+        } else {
+            if (l > curR) {
+                if (l <= curLine[1]) {
+                    result.push(curLine);
+                    curR = curLine[1];
+                    curLine = line;
+                } else {
+                    return 'No solution';
+                }
+            } else {
+                curLine = curLine[1] > line[1] ? curLine : line;
+            }
+        }
+
+        if (curLine[1] >= m) {
+            result.push(curLine);
+            return `${result.length}\n${result
+                .map((l) => l.join(' '))
+                .join(' ')}`;
+        }
+    }
+
+    return 'No solution';
 }
 
 let fileContent = fs.readFileSync('input.txt', 'utf8');
 const sequence = fileContent.toString().trim();
-const result = getMinimumCoverage(sequence);
+const result = getCoverage(sequence);
 fs.writeFileSync('output.txt', result.toString());

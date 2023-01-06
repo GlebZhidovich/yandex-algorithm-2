@@ -2,70 +2,46 @@
 
 const fs = require('fs');
 
-function getCats(sequence) {
-    let [m, ...lines] = sequence.split('\n');
-    m = parseInt(m);
-    const s = 0;
-
-    const result = [];
-
-    const mid = [];
-
-    for (let index = 0; index < lines.length - 1; index++) {
-        const l = lines[index];
-        if (l === '0 0') {
-            break;
-        }
-        const arr = l.split(' ').map((n) => parseInt(n));
-        if (!(arr[0] > m || arr[1] < s)) {
-            mid.push(arr);
-        }
-    }
-
-    if (!mid.length) {
-        return 'No solution';
-    }
-
-    mid.sort((a, b) => a[0] - b[0]);
-
-    let curR = 0;
-
-    let curLine;
-
-    for (let index = 0; index < mid.length; index++) {
-        const line = mid[index];
-        const [l, r] = line;
-
-        if (!curLine) {
-            if (l > curR) {
-                return 'No solution';
-            } else {
-                curLine = line;
-                curR = r;
-            }
+function binSearch(arr, n) {
+    let l = 0,
+        r = arr.length - 1;
+    while (r > l) {
+        const m = Math.floor((l + r) / 2);
+        const num = arr[m];
+        if (num >= n) {
+            r = m;
         } else {
-            if (l > curR) {
-                if (curLine[0] <= curR) {
-                    result.push(curLine);
-                    curR = curLine[1];
-                    curLine = line;
-                } else {
-                    return 'No solution';
-                }
-            } else {
-                curLine = curLine[1] > line[1] ? curLine : line;
-            }
-        }
-
-        if (curLine[1] >= m) {
-            result.push(curLine);
-            return `${result.length}\n${result
-                .map((l) => l.join(' '))
-                .join(' ')}`;
+            l = m + 1;
         }
     }
+    return l;
+}
 
-    return 'No solution';
+function getCats(sequence) {
+    const data = sequence.split('\n');
+    const [info, catsStr, ...lines] = data;
+
+    const cats = catsStr.split(' ').map((n) => parseInt(n));
+
+    cats.sort((a, b) => a - b);
+
+    const result = lines.map((line) => {
+        const [l, r] = line.split(' ').map((n) => parseInt(n));
+        let lIndex = binSearch(cats, l);
+        lIndex =
+            lIndex === cats.length - 1 && cats[lIndex] < r
+                ? lIndex + 1
+                : lIndex;
+        let rIndex = binSearch(cats, r + 1);
+        rIndex =
+            rIndex === cats.length - 1 && cats[rIndex] <= r
+                ? rIndex + 1
+                : rIndex;
+        const res = rIndex - lIndex;
+        return res;
+    });
+
+    return result.join(' ');
 }
 
 let fileContent = fs.readFileSync('input.txt', 'utf8');
